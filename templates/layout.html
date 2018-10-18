@@ -17,8 +17,20 @@
 <div class="navbar sticky-top navbar-dark bg-dark">
 
     {% if session['logged_in'] %}
-        <a class="navbar-brand" href="/">Flack room: {{ room_name }}</a>
-        <form class="form-inline my-2 my-lg-0" action="/search" method="POST">
+        <form method="POST" action="/room/{{ room }}">
+            <div class="form-inline my-2 my-lg-0">
+                <a class="navbar-brand" href="/">Flack room as a <span style='color: #FF0000;'>{{ session["nickname"] }}</span>: </a>
+                <select name='PreviousReceiver' onchange='if(this.value != {{ room_now }}) { this.form.submit(); }'>
+                    <option value='room_now'>{{ room_now }}</option>
+                    {% for room in rooms_list %}
+                        {% if (room != room_now) %}#}
+                            <option value="{{ room }}">{{ room }}</option>
+                        {% endif %}#}
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+        <form class="form-inline my-2 my-lg-0" action="/newchannel" method="POST">
             <input class="form-control mr-sm-2" type="search" placeholder="Enter name of new channel" name="search">
             <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2" type="submit">Create channel</button>
             <a href="/logout">
@@ -48,19 +60,19 @@
 <div class="mt-2 col-md-12"></div>
 
 {% if info_type and info_text %}
-{% if info_type == "succes" %}
-    <div class="alert alert-success" role="alert">
-        {{ info_text }}
-    </div>
-{% elif info_type == "error" %}
-    <div class="alert alert-danger" role="alert">
-        {{ info_text }}
-    </div>
-{% elif info_type == "neutral" %}
-    <div class="alert alert-info" role="alert">
-        {{ info_text }}
-    </div>
-{% endif %}
+    {% if info_type == "succes" %}
+        <div class="alert alert-success" role="alert">
+            {{ info_text }}
+        </div>
+    {% elif info_type == "error" %}
+        <div class="alert alert-danger" role="alert">
+            {{ info_text }}
+        </div>
+    {% elif info_type == "neutral" %}
+        <div class="alert alert-info" role="alert">
+            {{ info_text }}
+        </div>
+    {% endif %}
 {% endif %}
 
 
