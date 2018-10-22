@@ -3,11 +3,19 @@
 
 <head>
 
-    <title>{% block title %}{% endblock %}</title>
+    <title>
+        {% if session['logged_in'] %}
+            Flack: {{ room_now }} as {{ session["nickname"] }}
+        {% else %}
+            Flask version 1.0
+        {% endif %}
+    </title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"
           href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="../static/main.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='layout.js') }}"></script>
 
 </head>
 
@@ -19,20 +27,24 @@
     {% if session['logged_in'] %}
         <form method="POST" action="/room/{{ room }}">
             <div class="form-inline my-2 my-lg-0">
-                <a class="navbar-brand" href="/">Flack room as a <span style='color: #FF0000;'>{{ session["nickname"] }}</span>: </a>
-                <select name='PreviousReceiver' onchange='if(this.value != {{ room_now }}) { this.form.submit(); }'>
+                <a class="navbar-brand" href="/">Flack room as <span style='color: #FF0000;'>{{ nickname }}</span>: </a>
+                <select id="dropdown_rooms_list" onchange="if (this.value) window.location.href=this.value">
                     <option value='room_now'>{{ room_now }}</option>
-                    {% for room in rooms_list %}
-                        {% if (room != room_now) %}#}
-                            <option value="{{ room }}">{{ room }}</option>
-                        {% endif %}#}
-                    {% endfor %}
+
+                    <div id="dropdown_rooms_list_changing">
+                        {% for room in rooms_list %}
+                            {% if (room != room_now) %}#}
+                                <option value="/room/{{ room }}">{{ room }}</option>
+                            {% endif %}#}
+                        {% endfor %}
+                    </div>
+
                 </select>
             </div>
         </form>
-        <form class="form-inline my-2 my-lg-0" action="/newchannel" method="POST">
-            <input class="form-control mr-sm-2" type="search" placeholder="Enter name of new channel" name="search">
-            <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2" type="submit">Create channel</button>
+        <form class="form-inline my-2 my-lg-0" action="/new_room" method="POST" id="new_room_form">
+            <input class="form-control mr-sm-2" type="search" placeholder="New room name..." name="new_room_name" , id="new_room_name">
+            <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2" type="submit">Create room</button>
             <a href="/logout">
                 <button class="btn btn-outline-danger my-2 my-sm-0" type="button">Logout</button>
             </a>
