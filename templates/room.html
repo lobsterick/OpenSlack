@@ -1,5 +1,27 @@
 {% extends "layout.html" %}
+{% block head %}
+<script src="{{ url_for('static', filename='room.js') }}"></script>
+{% endblock %}
 
 {% block body %}
+<h1 align="center">Last 100 messages in this room</h1>
+{% if messages_list[room_now] %}
+    {% for message in messages_list[room_now] %}
+        <div align="center">
+            <div class="post center"><span style='color: #946e09; font-weight:bold'>UNKNOWN</span>: {{ message }}</div>
+        </div>
+    {% endfor %}
+{%  endif %}
 
+
+    <form id="new_message">
+        <footer class="footer">
+            <div class="container">
+                <div class="form-group row">
+                    <input class="form-control bg-dark text-white" type="text" value="" placeholder="Type your message and press Enter :)" id="new_message_body">
+                </div>
+            </div>
+        </footer>
+    </form>
 {% endblock %}
+

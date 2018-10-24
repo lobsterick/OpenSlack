@@ -17,6 +17,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='layout.js') }}"></script>
 
+{% block head %}{% endblock %}
+
 </head>
 
 
@@ -27,15 +29,15 @@
     {% if session['logged_in'] %}
         <form method="POST" action="/room/{{ room }}">
             <div class="form-inline my-2 my-lg-0">
-                <a class="navbar-brand" href="/">Flack room as <span style='color: #FF0000;'>{{ nickname }}</span>: </a>
+                <a class="navbar-brand" href="">Flack room as <span style='color: #FF0000;'>{{ nickname }}</span>: </a>
                 <select id="dropdown_rooms_list" onchange="if (this.value) window.location.href=this.value">
-                    <option value='room_now'>{{ room_now }}</option>
+                    <option selected hidden style="font-weight:bold">{{ room_now }}</option>
 
                     <div id="dropdown_rooms_list_changing">
                         {% for room in rooms_list %}
-                            {% if (room != room_now) %}#}
+                            {% if (room != room_now) %}
                                 <option value="/room/{{ room }}">{{ room }}</option>
-                            {% endif %}#}
+                            {% endif %}
                         {% endfor %}
                     </div>
 

@@ -8,10 +8,18 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 socketio = SocketIO(app)
 
-global nickname_list, rooms_list
+
+global nickname_list, rooms_list, messages_list
 nickname_list = []
 rooms_list = ["General", "Room_first", "Room_second", "Room_third"]
-last_room = {}
+messages_list = {"General": list(), "Room_first": list(), "Room_second": list(), "Room_third": list()}
+
+app.jinja_env.globals['messages_list'] = messages_list
+
+
+for key in messages_list:
+    for i in range(50):
+        messages_list[key].append(f"Message number {i} from room {key} asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd asd ")
 
 
 @app.route('/')
@@ -32,7 +40,7 @@ def do_admin_login():
         session["nickname"] = nickname
         nickname_list.append(nickname)
         print(f"{nickname} logged in :)")
-        return render_template("room.html", info_type="succes", info_text=f"You are logged as {nickname}", room_now="General", rooms_list=rooms_list, nickname=nickname)
+        return redirect(url_for('gotoroom', roomname="General"))
 
 
 @app.route("/logout")
@@ -59,7 +67,7 @@ def gotoroom(roomname):
         if roomname in rooms_list:
             return render_template("room.html", room_now=roomname, rooms_list=rooms_list, nickname=session["nickname"])
         else:
-            return render_template("room.html", info_type="error", info_text="Room doesn't exits!", nickname=session["nickname"])
+            return render_template("room.html", info_type="error", info_text="Room doesn't exits! Redirect to: General", nickname=session["nickname"], rooms_list=rooms_list, room_now="General")
     else:
         return render_template("index.html", info_type="error", info_text="You must first choose nickname!")
 
@@ -81,6 +89,13 @@ def add_room(new_room_name):
         print(f"NOWY POKÓJ {new_room_name}")
     else:
         render_template("index.html", info_type="error", info_text="This room exist!")
+
+
+@socketio.on("new_message_submit")
+def add_message(new_message_body):
+    rooms_list.append(new_room_name)
+    emit("update_messages", new_message_body, broadcast=True)
+    print(f"NOWA WIADOMOŚĆ {new_message_body}")
 
 
 if __name__ == '__main__':
