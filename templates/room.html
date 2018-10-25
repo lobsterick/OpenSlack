@@ -5,14 +5,13 @@
 
 {% block body %}
 <h1 align="center">Last 100 messages in this room</h1>
-{% if messages_list[room_now] %}
-    {% for message in messages_list[room_now] %}
-        <div align="center">
-            <div class="post center"><span style='color: #946e09; font-weight:bold'>UNKNOWN</span>: {{ message }}</div>
-        </div>
-    {% endfor %}
-{%  endif %}
-
+    <div id="messages_last_100" align="center">
+{#{% if messages_list[room_now] %}#}
+{#    {% for message in messages_list[room_now] %}#}
+{#        <div class="post"><span style='color: #946e09; font-weight:bold'>UNKNOWN</span> [TIME] said:</br> {{ message }}</div>#}
+{#    {% endfor %}#}
+{#{%  endif %}#}
+    </div>
 
     <form id="new_message">
         <footer class="footer">
