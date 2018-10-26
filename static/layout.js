@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // When a new room is announced, add to the dropdown rooms list
+    // TODO Page jump up when open dropdownlist, even when start position was bottom of the page
     socket.on('Update room list', data => {
         var dropdownlist = document.getElementById("dropdown_rooms_list");
         var opt = document.createElement('option');

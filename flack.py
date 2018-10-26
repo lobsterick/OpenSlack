@@ -85,7 +85,7 @@ def new_room():
 def add_room(new_room_name):
     if not new_room_name in rooms_list:
         rooms_list.append(new_room_name)
-        messages_list.update({new_room_name: {}})
+        messages_list.update({new_room_name: []})
         emit("Update room list", new_room_name, broadcast=True)
         print(f"NOWY POKÓJ {new_room_name}")
     else:
@@ -94,15 +94,16 @@ def add_room(new_room_name):
 
 @socketio.on("new_message_submit")
 def add_message(new_message_body):
-    messages_list_in_room = messages_list[session["last_room"]]
 
-    messages_list_in_room.update({"author": session["nickname"], "datetime": time.time(), "message": new_message_body})
-    # TODO repair parsing json for JS
+    messages_list[session["last_room"]].append([time.time(), session["nickname"], new_message_body])
 
-    messages_list_in_room = sorted(messages_list_in_room[session["last_room"]])
+    messages_list_last_100 = messages_list[session["last_room"]][-100:]
 
-    emit("update_messages", messages_list_in_room, broadcast=True)
-    print(f"NOWA WIADOMOŚĆ {new_message_body} w pokoju {room}")
+    updated_list = {session["last_room"]: messages_list_last_100}
+
+    emit("update_messages", updated_list, broadcast=True)
+
+    print(f"NOWA WIADOMOŚĆ {new_message_body}")
 
 
 if __name__ == '__main__':
