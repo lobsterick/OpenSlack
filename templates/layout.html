@@ -5,7 +5,7 @@
 
     <title>
         {% if session['logged_in'] %}
-            Flack: {{ room_now }} as {{ session["nickname"] }}
+            Flack: {{ session["last_room"] }} as {{ session["nickname"] }}
         {% else %}
             Flask version 1.0
         {% endif %}
@@ -29,13 +29,13 @@
     {% if session['logged_in'] %}
         <form method="POST" action="/room/{{ room }}">
             <div class="form-inline my-2 my-lg-0">
-                <a class="navbar-brand" href="">Flack room as <span style='color: #FF0000;'>{{ nickname }}</span>: </a>
+                <a class="navbar-brand" href="">Flack room as <span style='color: #FF0000;'>{{ session["nickname"] }}</span>: </a>
                 <select id="dropdown_rooms_list" onchange="if (this.value) window.location.href=this.value">
-                    <option selected hidden style="font-weight:bold">{{ room_now }}</option>
+                    <option selected hidden style="font-weight:bold">{{ session["last_room"] }}</option>
 
                     <div id="dropdown_rooms_list_changing">
                         {% for room in rooms_list %}
-                            {% if (room != room_now) %}
+                            {% if (room != session["last_room"]) %}
                                 <option value="/room/{{ room }}">{{ room }}</option>
                             {% endif %}
                         {% endfor %}

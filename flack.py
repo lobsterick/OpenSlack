@@ -18,15 +18,17 @@ messages_list = {"General":
                       [3, "admin", "This is third message, that appears with timestamp of three"]], "Room_first": []}
 
 app.jinja_env.globals['messages_list'] = messages_list
+app.jinja_env.globals['rooms_list'] = rooms_list
+
 # TODO add all stuff from render_template to free all return render_template from repeated parameters
 
 
 @app.route('/')
 def home():
     if session.get("logged_in"):
-        return render_template("room.html", room_now=session["last_room"], rooms_list=rooms_list, nickname=session["nickname"])
+        return render_template("room.html")
     else:
-        return render_template("index.html", rooms_list=rooms_list)
+        return render_template("index.html")
 
 
 @app.route('/login', methods=['POST'])
@@ -54,7 +56,7 @@ def logout():
 
         session.clear()
         print(f"{exituser} logged out :(")
-        return render_template("index.html", info_type="neutral", info_text="Hope to see you soon! :)", rooms_list=rooms_list)
+        return render_template("index.html", info_type="neutral", info_text="Hope to see you soon! :)")
     else:
         return redirect(url_for('home'))
 
@@ -64,9 +66,9 @@ def gotoroom(roomname):
     if session.get('logged_in'):
         session["last_room"] = roomname
         if roomname in rooms_list:
-            return render_template("room.html", room_now=roomname, rooms_list=rooms_list, nickname=session["nickname"])
+            return render_template("room.html")
         else:
-            return render_template("room.html", info_type="error", info_text="Room doesn't exits! Redirect to: General", nickname=session["nickname"], rooms_list=rooms_list, room_now="General")
+            return redirect(url_for('gotoroom', roomname="General"))
     else:
         return render_template("index.html", info_type="error", info_text="You must first choose nickname!")
 
@@ -75,7 +77,6 @@ def gotoroom(roomname):
 def new_room():
     if session.get('logged_in'):
         new_room_name = request.form["new_room_name"]
-
         return redirect(url_for('gotoroom', roomname=new_room_name))
     else:
         return render_template("index.html", info_type="error", info_text="You must first choose nickname!")
