@@ -1,7 +1,7 @@
-from flask import Flask, session, request, render_template, redirect, url_for
+from flask import Flask, session, request, render_template, redirect, url_for, jsonify
 from flask_session import Session
 from flask_socketio import SocketIO, emit
-import time
+import time, re
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -10,23 +10,21 @@ Session(app)
 socketio = SocketIO(app)
 
 nickname_list = []
-rooms_list = ["General", "Room_first"]
-# TODO unify getting rooms_list from message_list
-messages_list = {"General":
-                     [[1, "admin", "This is first message, that appears with timestamp of one"],
-                      [2, "admin", "This is second message, that appears with timestamp of two"],
-                      [3, "admin", "This is third message, that appears with timestamp of three"]], "Room_first": []}
+messages_list = dict(General=[[1, "admin", "This is first message, that appears with timestamp of one"],
+                              [2, "admin", "This is second message, that appears with timestamp of two"],
+                              [3, "admin", "This is third message - timestamp of three"]])
+
+rooms_list = list(messages_list.keys())
+
 
 app.jinja_env.globals['messages_list'] = messages_list
 app.jinja_env.globals['rooms_list'] = rooms_list
-
-# TODO add all stuff from render_template to free all return render_template from repeated parameters
 
 
 @app.route('/')
 def home():
     if session.get("logged_in"):
-        return render_template("room.html")
+        return redirect(url_for('go_to_room', roomname=session["last_room"]))
     else:
         return render_template("index.html")
 
@@ -40,71 +38,112 @@ def do_admin_login():
         session['logged_in'] = True
         session["nickname"] = nickname
         nickname_list.append(nickname)
-        print(f"{nickname} logged in :)")
-        return redirect(url_for('gotoroom', roomname="General"))
+        return redirect(url_for('go_to_room', roomname="General"))
 
 
 @app.route("/logout")
 def logout():
     if session.get('logged_in'):
+        global nickname_list
 
-        # In case there was a server restart when user is still logged in and - in this case - his nickname is not in the list anymore (list of nicknames is stored only when SERVER IS WORKING)
-        # In this case, we trust that user is not manipulating cookies, but still - we don't check that nick is associated with the same person whatsoever...
-        exituser = session["nickname"]
+        # Below code is written in specific case, when there was a server restart with user still logged in and his nickname is not in the list anymore (list of nicknames is stored only when SERVER IS WORKING) In this case, we trust that user is not manipulating cookies (the idea of nicknames is that we don't check if nick is associated with the same person whatsoever).
+
         if session["nickname"] in nickname_list:
             nickname_list.remove(session["nickname"])
-
         session.clear()
-        print(f"{exituser} logged out :(")
         return render_template("index.html", info_type="neutral", info_text="Hope to see you soon! :)")
     else:
         return redirect(url_for('home'))
 
 
 @app.route("/room/<roomname>")
-def gotoroom(roomname):
+def go_to_room(roomname):
     if session.get('logged_in'):
         session["last_room"] = roomname
         if roomname in rooms_list:
             return render_template("room.html")
         else:
-            return redirect(url_for('gotoroom', roomname="General"))
+            return redirect(url_for('go_to_room', roomname="General"))
     else:
         return render_template("index.html", info_type="error", info_text="You must first choose nickname!")
 
 
-@app.route("/new_room", methods=['POST'])
+@app.route("/room/<roomname>/json", methods=['GET'])  # endpoint for fetching posts when entering room
+def get_room_messages(roomname):
+    global rooms_list
+    if session.get('logged_in'):
+        if roomname in rooms_list:
+            messages_list_last_100 = messages_list[roomname][-100:]
+            updated_list = {"success": True, roomname: messages_list_last_100}
+            return jsonify(updated_list)
+    else:
+        return jsonify({"success": False})
+
+
+@app.route("/new_room", methods=['POST'])  # logic of making new room in socketio.on("update_room_list")
 def new_room():
     if session.get('logged_in'):
-        new_room_name = request.form["new_room_name"]
-        return redirect(url_for('gotoroom', roomname=new_room_name))
+        new_room_name_requested = request.form["new_room_name"]
+        new_room_name = re.sub('[^0-9a-zA-Z]+', "", new_room_name_requested)  # sanitizing
+        if new_room_name != "":
+            return redirect(url_for('go_to_room', roomname=new_room_name))
+        else:
+            return redirect(url_for('go_to_room', roomname="General"))
+
     else:
         return render_template("index.html", info_type="error", info_text="You must first choose nickname!")
 
 
-@socketio.on("update_room_list")
+@socketio.on("update_room_list")  # sanitized with JS side, but can be sanitized here like new_room()
 def add_room(new_room_name):
-    if not new_room_name in rooms_list:
+    global rooms_list
+    if new_room_name not in rooms_list:
         rooms_list.append(new_room_name)
         messages_list.update({new_room_name: []})
         emit("Update room list", new_room_name, broadcast=True)
-        print(f"NOWY POKÓJ {new_room_name}")
-    else:
-        render_template("index.html", info_type="error", info_text="This room exist!")
 
 
 @socketio.on("new_message_submit")
 def add_message(new_message_body):
-
+    global messages_list
     messages_list[session["last_room"]].append([time.time(), session["nickname"], new_message_body])
-
-    messages_list_last_100 = messages_list[session["last_room"]][-100:]
-
+    messages_list[session["last_room"]] = messages_list[session["last_room"]][-100:]
+    messages_list_last_100 = messages_list[session["last_room"]]
     updated_list = {session["last_room"]: messages_list_last_100}
-
     emit("update_messages", updated_list, broadcast=True)
 
-    print(f"NOWA WIADOMOŚĆ {new_message_body}")
+
+@app.route("/add100")  # for research purposes :)
+def add_room():
+    global messages_list, rooms_list
+    for room in rooms_list:
+        for message in range(100):
+            new_message_body = f"This is automatic message number {message+1}"
+            messages_list[room].append([time.time(), "AutomatMessages", new_message_body])
+    return redirect(url_for('go_to_room', roomname="General"))
+
+
+@app.route("/deleteall")  # delete all message and log out
+def delete_all_messages():
+    global messages_list, nickname_list
+    if session.get('logged_in'):
+        user = session["nickname"]
+        messages_list_new = {}
+
+        for room in messages_list:
+            messages_list_new.update({room: []})
+            for item in messages_list[room]:
+                if item[1] != user:
+                    messages_list_new[room].append(item)
+
+        messages_list = messages_list_new
+
+        if session["nickname"] in nickname_list:
+            nickname_list.remove(session["nickname"])
+        session.clear()
+        return render_template("index.html", info_type="neutral", info_text="All your data and posts have been deleted. Hope to see you again! :(")
+    else:
+        return redirect(url_for('home'))
 
 
 if __name__ == '__main__':

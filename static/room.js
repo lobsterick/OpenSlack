@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // TODO Load all post when entering room
 
-    window.scrollTo(0, document.body.scrollHeight);
+    // Load all messages via Ajax request
+    fetchPostsOnLoad();
 
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
@@ -22,23 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // When a new message is announced, reload all messages on page
-    socket.on('update_messages', updated_list => loadmessages(updated_list));
+    socket.on('update_messages', updated_list => loadMessages(updated_list));
 
 });
 
-function loadmessages(updated_list) {
+function loadMessages(updated_list) {
     const last_room = window.location.href.split("/").pop();
     if (updated_list[last_room]) {
         var messages_last_100 = document.getElementById("messages_last_100");
         messages_last_100.innerHTML = "";
         var posts;
-        // console.log(updated_list); // debugging
         for (posts in updated_list[last_room]) {
             var timestamp = new Date(updated_list[last_room][posts][0] * 1000).toLocaleString();
             var post = document.createElement('div');
             var inHTML = '<div class="post"><span style=\'color: #946e09; font-weight:bold\'>';
             inHTML += updated_list[last_room][posts][1];
-            inHTML += '</span> (timestamp:  ';
+            inHTML += '</span> (';
             inHTML += timestamp;
             inHTML += ") </br>";
             inHTML += updated_list[last_room][posts][2];
@@ -48,4 +47,35 @@ function loadmessages(updated_list) {
         }
         window.scrollTo(0, document.body.scrollHeight);
         return false
-    }}
+    }
+}
+
+function fetchPostsOnLoad(){
+    const request = new XMLHttpRequest();
+    const room = window.location.href.split("/").pop();
+    const requestAdress = `/room/${room}/json`;
+
+    request.open('GET', requestAdress, true);
+
+    // Callback function for when request completes
+    request.addEventListener('load', function() {
+
+        // Extract JSON data from request
+        const data = JSON.parse(request.responseText);
+
+        // Present all posts on page
+        if (data.success) {
+            loadMessages(data);
+            return false
+
+        }
+        else {
+            alert("Error when trying to fetch data");
+            return false
+        }
+    });
+
+    console.log("Send request"); // debugging
+    request.send();
+
+}

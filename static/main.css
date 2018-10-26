@@ -33,8 +33,6 @@ hr {
     border-radius: 5px;
     margin: 10px;
     width: 60%;
+    word-wrap: break-word;
 }
 
-/*#messages_last_100 {*/
-    /*text-align: center*/
-/*}*/
