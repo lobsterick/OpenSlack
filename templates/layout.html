@@ -28,8 +28,8 @@
         <form method="POST" action="/room/{{ room }}">
             <div class="form-inline my-2 my-xl-0 my-lg-0 my-md-0 mr-1">
                 <a class="navbar-brand" href="">Flack room as <span style='color: #119c1e;'>{{ session["nickname"] }}</span>: </a>
-                <select id="dropdown_rooms_list" onchange="if (this.value) window.location.href=this.value">
-                    <option selected hidden style="font-weight:bold">{{ session["last_room"] }}</option>
+                            <select id="dropdown_rooms_list" onchange="if (this.value) window.location.href=this.value">
+                    <option selected hidden style="font-weight:bold ">{{ session["last_room"] }}</option>
 
                     <div id="dropdown_rooms_list_changing">
                         {% for room in rooms_list %}
@@ -43,7 +43,7 @@
             </div>
         </form>
         <form class="form-inline " action="/new_room" method="POST" id="new_room_form">
-            <input class="form-control mx-1 my-2 my-xl-0" type="search" placeholder="Room name..." name="new_room_name", id="new_room_name" required>
+            <input class="form-control mx-1 my-2 my-xl-0" type="search" placeholder="Room name..." name="new_room_name" , id="new_room_name" required>
             <button class="btn btn-outline-success mx-1 my-xl-0 my-2" type="submit">Create room</button>
             <a href="/logout">
                 <button class="btn btn-outline-warning mx-1 my-xl-0 my-2" type="button">Logout</button>
