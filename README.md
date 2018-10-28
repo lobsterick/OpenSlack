@@ -4,37 +4,38 @@ Inside this repo, you can find main application `flack.py` and two folders: `sta
 ## What is Flack?
 Flack is an online application, similar to [Slack](http://www.slack.com), providing possibility of contact between connected users in real-time. Concept of this app is based on three concepts:
 
-* **nickname** - the name choosen by user to communicate with rest of the application users. One person can generate unlimited amount of nicknames and using them without any authorisation (*no password*). One nickname can be used by many people, but only one person can use specific nickname at the time. Nickname are avaliable again, when user logged out.
+* **nickname** - the name chosen by user to communicate with rest of the application users. One person can generate unlimited amount of nicknames and using them without any authorisation (*no password*). One nickname can be used by many people, but only one person can use specific nickname at the time. Nickname are available again, when user logged out.
 
-* **room** - space of communication, storing sended messages. Nicknames can acces all rooms, create new rooms (if specific room don't exist) and change room at any time. Every room store last 100 messages. Every message contain nickname of autor, date of creation and text body of message. Nickname can also *"flush"* all activity; delete all messages that is binded with specific nickname.
+* **room** - space of communication, storing messages. Nicknames can access all rooms, create new rooms (if specific room don't exist) and change room at any time. Every room store last 100 messages. Every message contain nickname of author, date of creation and text body of message. Nickname can also *"flush"* all activity; delete all messages that is connected with specific nickname.
 
-* **sessions** - when user choose nickname, all data is stored in `session` binded to specific user. Once nickname is reserved - can be used until user log out, even after closing browser.
+* **sessions** - when user choose nickname, all data is stored in `session` belonging to to specific user. Thanks to localStorage, once nickname is reserved - can be used until user log out, even after closing browser.
 
-<u>All comunication in Flack is **real-time** - new messages and rooms appear immediately after reciving them by server, without manually reloading page.</u>
+<u>All communication in Flack is **real-time** - new messages and rooms appear immediately after receiving them by server, without manually reloading page.</u>
 
 ## How to start?
 Just start Flask app and go to localhost address (f.e. `127.0.0.1:3000`). Everything should setup itself :) 
 ## How to use?
-Type choosen nickname in form and click `Reserve nickname` button. After this, You will be redirect to `General` room. Now, You can send messages by typing them in form at the bottom of the page (*send by click enter*) or create new room using form located in right section of navbar. Changing room is possible in two ways - choosing room name in droplist in left section of navbar or using right-section form (if You type existing room name, it will redirect You to it).
+Type chosen nickname in form and click `Reserve nickname` button. After this, You will be redirect to `General` room. Now, You can send messages by typing them in form at the bottom of the page (*send by click enter*) or create new room using form located in right section of navbar. Changing room is possible in two ways - choosing room name in droplist in left section of navbar or using right-section form (if You type existing room name, it will redirect You to it).
 ## Used technologies
 
 ### Python
-Primary language for all backend logic for this project, with use of **Flask** - framework for creating server and managing endpoints (8 routes; 2 dynamicly generated, 1 API endpoint), along with: 
-* **Flask session** - to store session-depended informations, like nicknames or actual room
-* **socketIO** - for emitting events like creating new room or message
-* **Flask render_template** - for rendering views depended on actual status of user's action
+Primary language for all backend logic for this project, with use of **Flask** - framework for creating server and managing endpoints (8 routes; 2 dynamically generated, 1 API endpoint), along with: 
+* **Flask session** - to store session-depended information, like nicknames or actual room in server side,
+* **socketIO** - for emitting events like creating new room or message,
+* **Flask render_template** - for rendering views depended on actual status of user's action,
 
 ### HTML
-Primary language for all frontend logic for this project. All views are created by Flask's ***render_template*** with use of **Jinja2** providing possibilities like inserting variables in HTML code or view's dependency. All templates inherit from `layout.html`, adding specific elements for main page (`index.html`) and room page (`room.html`). Navigation bar provide different possibilities, dependend on login status (logic implemented in Jinja2). Styling of HTML content is made using **CSS** (`main.css`). Most of elements are based on **Bootstrap 4**.
+Primary language for all frontend logic for this project. All views are created by Flask's ***render_template*** with use of **Jinja2** providing possibilities like inserting variables in HTML code or view's dependency. All templates inherit from `layout.html`, adding specific elements for main page (`index.html`) and room page (`room.html`). Navigation bar provide different possibilities, depended on login status (logic implemented in Jinja2). Styling of HTML content is made using **CSS** (`main.css`). Most of elements are based on **Bootstrap 4**.
 
 ### Javascript
-Language responsible for responsivness of generated pages (`layout.js` and `room.js`). Using Javascript allow to using real-time events like:
+Language responsible for responsiveness of generated pages (`layout.js` and `room.js`). Using Javascript allow to using real-time events like:
 * exchange messages and presenting it on page
-* automaticly updating room's list
-* sending messages with Enter key
-* preventing page reload on common events (like receiving and sending messages)
-* sanitizing room names (for backend purposes)
-* [<u>with</u> <u>*XMLHttpRequest*</u>] preloading posts on room change, using own API
+* automatically updating room's list,
+* sending messages with Enter key,
+* preventing page reload on common events (like receiving and sending messages),
+* sanitizing room names (for backend purposes),
+* [<u>with</u> <u>*XMLHttpRequest*</u>] preloading posts on room change, using own API, checking login status
+* access localStorage (remember nickname, even after closing window)
 
 ## Screenshots
 ### Index page

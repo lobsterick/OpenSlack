@@ -75,7 +75,6 @@ function fetchPostsOnLoad(){
         }
     });
 
-    console.log("Send request"); // debugging
     request.send();
 
 }

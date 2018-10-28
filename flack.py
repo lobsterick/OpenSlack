@@ -41,17 +41,50 @@ def do_admin_login():
         return redirect(url_for('go_to_room', roomname="General"))
 
 
+@app.route('/checklogin', methods=['POST', 'GET'])
+def check_login():
+    if request.method == 'POST':
+        print("POST method on /checklogin")
+        requested_nickname = str(request.form['nickname'])
+        requested_last_room = str(request.form['last_room'])
+        if session.get("logged_in") and session.get("nickname") and session["nickname"] == requested_nickname:
+            print("User is properly using website")
+            return jsonify({"status": True, "last_room": session["last_room"]})
+        elif requested_nickname in nickname_list:
+            session["logged_in"] = True
+            session["nickname"] = requested_nickname
+            session["last_room"] = requested_last_room
+            print("User has localStorage that is consistent with server data")
+            return jsonify({"status": False})
+        else:
+            nickname_list.append(requested_nickname)
+            session["logged_in"] = True
+            session["nickname"] = requested_nickname
+            session["last_room"] = requested_last_room
+            print("User has localStorage that INCONSISTENT with server data, but now he is logged in. It may be caused by server restart.")
+            return jsonify({"status": False})
+
+    if request.method == 'GET':
+        print("GET method on /checklogin")
+        if session.get("logged_in"):
+            response = {"logged": True, "nickname": session["nickname"], "last_room": session["last_room"]}
+            print("Responded with True")
+            return jsonify(response)
+        else:
+            print("Responded with False")
+            response = {"logged": False}
+            return jsonify(response)
+
+
 @app.route("/logout")
 def logout():
     if session.get('logged_in'):
-        global nickname_list
-
-        # Below code is written in specific case, when there was a server restart with user still logged in and his nickname is not in the list anymore (list of nicknames is stored only when SERVER IS WORKING) In this case, we trust that user is not manipulating cookies (the idea of nicknames is that we don't check if nick is associated with the same person whatsoever).
-
         if session["nickname"] in nickname_list:
             nickname_list.remove(session["nickname"])
+        else:
+            print("There is a possibility that more than one person was using the same nickname in the same time")
         session.clear()
-        return render_template("index.html", info_type="neutral", info_text="Hope to see you soon! :)")
+        return render_template("index.html", info_type="neutral", info_text="Hope to see you soon! :)", logout=True)
     else:
         return redirect(url_for('home'))
 
@@ -70,7 +103,6 @@ def go_to_room(roomname):
 
 @app.route("/room/<roomname>/json", methods=['GET'])  # endpoint for fetching posts when entering room
 def get_room_messages(roomname):
-    global rooms_list
     if session.get('logged_in'):
         if roomname in rooms_list:
             messages_list_last_100 = messages_list[roomname][-100:]
@@ -96,7 +128,6 @@ def new_room():
 
 @socketio.on("update_room_list")  # sanitized with JS side, but can be sanitized here like new_room()
 def add_room(new_room_name):
-    global rooms_list
     if new_room_name not in rooms_list:
         rooms_list.append(new_room_name)
         messages_list.update({new_room_name: []})
@@ -105,7 +136,6 @@ def add_room(new_room_name):
 
 @socketio.on("new_message_submit")
 def add_message(new_message_body):
-    global messages_list
     messages_list[session["last_room"]].append([time.time(), session["nickname"], new_message_body])
     messages_list[session["last_room"]] = messages_list[session["last_room"]][-100:]
     messages_list_last_100 = messages_list[session["last_room"]]
@@ -114,8 +144,7 @@ def add_message(new_message_body):
 
 
 @app.route("/add100")  # for research purposes :)
-def add_room():
-    global messages_list, rooms_list
+def add_room(messages_list, rooms_list):
     for room in rooms_list:
         for message in range(100):
             new_message_body = f"This is automatic message number {message+1}"
@@ -141,7 +170,7 @@ def delete_all_messages():
         if session["nickname"] in nickname_list:
             nickname_list.remove(session["nickname"])
         session.clear()
-        return render_template("index.html", info_type="neutral", info_text="All your data and posts have been deleted. Hope to see you again! :(")
+        return render_template("index.html", info_type="neutral", info_text="All your data and posts have been deleted. Hope to see you again! :(", logout=True)
     else:
         return redirect(url_for('home'))
 
