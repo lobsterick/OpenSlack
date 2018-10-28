@@ -3,12 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load all messages via Ajax request
     fetchPostsOnLoad();
 
-    // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-
     // When you add new message with submit, server should append it to the room's messages
-
     socket.on('connect', () => {
         document.querySelector("#new_message").onsubmit = function () {
             var new_message_body = document.querySelector("#new_message_body").value;
@@ -54,20 +51,13 @@ function fetchPostsOnLoad(){
     const request = new XMLHttpRequest();
     const room = window.location.href.split("/").pop();
     const requestAdress = `/room/${room}/json`;
-
     request.open('GET', requestAdress, true);
-
-    // Callback function for when request completes
     request.addEventListener('load', function() {
-
-        // Extract JSON data from request
         const data = JSON.parse(request.responseText);
-
         // Present all posts on page
         if (data.success) {
             loadMessages(data);
             return false
-
         }
         else {
             alert("Error when trying to fetch data");

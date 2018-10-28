@@ -37,6 +37,9 @@ Language responsible for responsiveness of generated pages (`layout.js` and `roo
 * [<u>with</u> <u>*XMLHttpRequest*</u>] preloading posts on room change, using own API, checking login status
 * access localStorage (remember nickname, even after closing window)
 
+#### Security concern about `localStorage`
+After adding localStorage logic in client-side, it is now possible to log in as user already logged in, due to nature of "log in check" in Javascript. In this app we trust that user provide us real information about his actions. It can lead to undefined behaviour if user manipulate his localStorage - from normal usage of one nick simultaneously by many people to server crash when trying preform actions after one of them logged out. Solution for this might require add password option, but - since the task was operating only on nicknames and reloading nickname even after closing browser - logic of the app was implemented in this way.
+
 ## Screenshots
 ### Index page
 <p align="center">

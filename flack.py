@@ -15,8 +15,6 @@ messages_list = dict(General=[[1, "admin", "This is first message, that appears 
                               [3, "admin", "This is third message - timestamp of three"]])
 
 rooms_list = list(messages_list.keys())
-
-
 app.jinja_env.globals['messages_list'] = messages_list
 app.jinja_env.globals['rooms_list'] = rooms_list
 
@@ -41,7 +39,7 @@ def do_admin_login():
         return redirect(url_for('go_to_room', roomname="General"))
 
 
-@app.route('/checklogin', methods=['POST', 'GET'])
+@app.route('/checklogin', methods=['POST', 'GET'])  # endpoint for client-side checking if user is logged
 def check_login():
     if request.method == 'POST':
         print("POST method on /checklogin")
@@ -144,7 +142,7 @@ def add_message(new_message_body):
 
 
 @app.route("/add100")  # for research purposes :)
-def add_room(messages_list, rooms_list):
+def add_room():
     for room in rooms_list:
         for message in range(100):
             new_message_body = f"This is automatic message number {message+1}"
@@ -158,15 +156,12 @@ def delete_all_messages():
     if session.get('logged_in'):
         user = session["nickname"]
         messages_list_new = {}
-
         for room in messages_list:
             messages_list_new.update({room: []})
             for item in messages_list[room]:
                 if item[1] != user:
                     messages_list_new[room].append(item)
-
         messages_list = messages_list_new
-
         if session["nickname"] in nickname_list:
             nickname_list.remove(session["nickname"])
         session.clear()

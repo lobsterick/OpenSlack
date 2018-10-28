@@ -17,23 +17,16 @@
         <script>localStorage.clear()</script>
     {% endif %}
     <script src="{{ url_for('static', filename='layout.js') }}"></script>
-
     {% block head %}{% endblock %}
-
 </head>
-
-
 <body>
-
 <div class="navbar sticky-top navbar-dark bg-dark">
-
     {% if session['logged_in'] %}
         <form method="POST" action="/room/{{ room }}">
             <div class="form-inline my-2 my-xl-0 my-lg-0 my-md-0 mr-1">
                 <a class="navbar-brand" href="">Flack room as <span style='color: #119c1e;'>{{ session["nickname"] }}</span>: </a>
                 <select id="dropdown_rooms_list" onchange="if (this.value) window.location.href=this.value">
-                    <option selected hidden style="font-weight:bold ">{{ session["last_room"] }}</option>
-
+                    <option selected style="font-weight:bold ">{{ session["last_room"] }}</option>
                     <div id="dropdown_rooms_list_changing">
                         {% for room in rooms_list %}
                             {% if (room != session["last_room"]) %}
@@ -41,7 +34,6 @@
                             {% endif %}
                         {% endfor %}
                     </div>
-
                 </select>
             </div>
         </form>
@@ -56,7 +48,6 @@
                 </button>
             </a>
         </form>
-
     {% else %}
         <a class="navbar-brand" href="/">Welcome on Flack!</a>
         <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
@@ -75,9 +66,7 @@
     {% endif %}
     </nav>
 </div>
-
 <div class="mt-2 col-md-12"></div>
-
 {% if info_type and info_text %}
     {% if info_type == "succes" %}
         <div class="alert alert-success" role="alert">
@@ -93,10 +82,6 @@
         </div>
     {% endif %}
 {% endif %}
-
-
 {% block body %}{% endblock %}
-
-
 </body>
 </html>
