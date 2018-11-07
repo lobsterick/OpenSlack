@@ -1,4 +1,4 @@
-﻿# Project 2 - Web Programming with Python and JavaScript "Flack" by LOBSTERICK
+﻿# Flack / OpenSlack - Free implementation of Slack
 ## What's inside?
 Inside this repo, you can find main application `flack.py` and two folders: `static` (with static files, like images and JS files) and `templates` (with templates of html views). After starting application, there will be created folder `flask_session` with session files of all user connected to server.
 ## What is Flack?
@@ -11,6 +11,8 @@ Flack is an online application, similar to [Slack](http://www.slack.com), provid
 * **sessions** - when user choose nickname, all data is stored in `session` belonging to to specific user. Thanks to localStorage, once nickname is reserved - can be used until user log out, even after closing browser.
 
 <u>All communication in Flack is **real-time** - new messages and rooms appear immediately after receiving them by server, without manually reloading page.</u>
+
+Project was made as task for CS50W course, according to requirements available [here](https://docs.cs50.net/web/2018/x/projects/2/project2.html). 
 
 ## How to start?
 Just start Flask app and go to localhost address (f.e. `127.0.0.1:3000`). Everything should setup itself :) 
